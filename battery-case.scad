@@ -106,6 +106,7 @@ module finger_grip(dimensions, cell_count, negative=false) {
     d = 20 + (negative ? 0.4 : 0);
     
     translate([last_x(dimensions, cell_count) / 2, 0, 0])
+    scale(negative ? [1, 1, 1] : [1, 1, 0.5])
     intersection() {
         rotate([90, 0, 0])
         cylinder(h=outer_diameter(dimensions) + (negative ? epsilon * 2 : 0), d=d, center=true, $fn=120);
