@@ -1,12 +1,14 @@
 // [Diameter, length], including clearance
-aa_dimensions = [14.4, 51];
+aa_dimensions = [14.7, 51];
 aaa_dimensions = [44.5, 10.85];
 
 inner_wall_thickness = 0.8;
 outer_wall_thickness = 0.8;
-wall_clearance_x = 0.3;
-wall_clearance_round = 0.0;
+inter_cell_wall = 0.8;
+wall_clearance_x = 0.2;
+wall_clearance_round = 0.2;
 end_thickness = 0.8;
+end_bevel = 0.6;
 
 epsilon = 0.01;
 
@@ -14,7 +16,7 @@ epsilon = 0.01;
 battery_case(aa_dimensions, 3, false);
 
 
-function spacing(dimensions) = dimensions.x * 1.1;
+function spacing(dimensions) = dimensions.x + inter_cell_wall;
 function last_x(dimensions, cell_count) = spacing(dimensions) * (cell_count - 1);
 function outer_diameter(dimensions) = dimensions.x + (inner_wall_thickness + outer_wall_thickness + wall_clearance_round) * 2;
 
@@ -107,8 +109,9 @@ module end_cap(dimensions, cell_count) {
     module end_cap_cylinder() {
         hull() {
             cylinder(
-                d=outer_diameter(dimensions) - end_thickness * 1.1,
-                h=end_thickness / 2);
+                d1=outer_diameter(dimensions) - end_thickness * 1.1,
+                d2 = dimensions.x + inner_wall_thickness * 2, // inner case diameter
+                h=end_thickness + end_bevel);
             translate([0, 0, end_thickness / 2 - epsilon])
             cylinder(
                 d=outer_diameter(dimensions),
