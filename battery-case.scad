@@ -25,7 +25,7 @@ module battery_case(dimensions, cell_count, preview=false) {
     battery_case_inner(dimensions, cell_count);
 
     if (preview) {
-        translate([0, 0, 10])
+        translate([0, 0, 1])
         color("white")
         battery_case_outer(dimensions, cell_count);
     } else {
@@ -58,6 +58,8 @@ module battery_case_inner(dimensions, cell_count) {
         }
     }
     
+    finger_grip(dimensions, cell_count, false);
+    
     module shell_cylinder() {
         cylinder(d=dimensions.x + inner_wall_thickness * 2, h=dimensions.y + end_thickness - epsilon);
     }
@@ -67,6 +69,7 @@ module battery_case_outer(dimensions, cell_count) {
     $fn = 60;
     last_x = last_x(dimensions, cell_count);
     
+    render()
     difference() {
         union() {
             translate([0, 0, 0])
@@ -89,11 +92,28 @@ module battery_case_outer(dimensions, cell_count) {
             translate([-wall_clearance_x, 0, 0])
             inside_of_outer_cylinder();
         }
+        
+        finger_grip(dimensions, cell_count, true);
     }
     
     module inside_of_outer_cylinder() {
         translate([0, 0, -epsilon])
         cylinder(d=dimensions.x + (inner_wall_thickness + wall_clearance_round) * 2, h=dimensions.y);
+    }
+}
+
+module finger_grip(dimensions, cell_count, negative=false) {
+    d = 20 + (negative ? 0.4 : 0);
+    
+    translate([last_x(dimensions, cell_count) / 2, 0, 0])
+    intersection() {
+        rotate([90, 0, 0])
+        cylinder(h=outer_diameter(dimensions) + (negative ? epsilon * 2 : 0), d=d, center=true, $fn=120);
+        
+        // Cut to half cylinder
+        translate([0, 0, -epsilon])
+        linear_extrude(d/2 + epsilon)
+        square([d, d], center=true);
     }
 }
 
