@@ -11,43 +11,47 @@ end_thickness = 0.8;
 epsilon = 0.01;
 
 
-preview(aa_dimensions, 3);
+battery_case(aa_dimensions, 3, false);
 
-module preview(dimensions, cell_count) {
+
+function spacing(dimensions) = dimensions.x * 1.1;
+function last_x(dimensions, cell_count) = spacing(dimensions) * (cell_count - 1);
+function outer_diameter(dimensions) = dimensions.x + (inner_wall_thickness + outer_wall_thickness + wall_clearance_round) * 2;
+
+
+module battery_case(dimensions, cell_count, preview=false) {
     battery_case_inner(dimensions, cell_count);
-    translate([0, 0, 10])
-    color("white")
-    battery_case_outer(dimensions, cell_count);
-}
 
+    if (preview) {
+        translate([0, 0, 10])
+        color("white")
+        battery_case_outer(dimensions, cell_count);
+    } else {
+        translate([0, dimensions.x + (inner_wall_thickness + outer_wall_thickness + wall_clearance_round * 2) + 5, 0])
+        rotate([180, 0, 0])
+        translate([0, 0, -dimensions.y])
+        battery_case_outer(dimensions, cell_count);
+    }
+}
 
 module battery_case_inner(dimensions, cell_count) {
     $fn = 60;
-    spacing = dimensions.x * 1.1;
-    last_x = spacing * (cell_count - 1);
-    
+
     difference() {
         union() {
             // Outer shell shape
             translate([0, 0, -end_thickness])
             hull() {
-                translate([last_x, 0, 0])
+                translate([last_x(dimensions, cell_count), 0, 0])
                 shell_cylinder();
                 shell_cylinder();
             }
 
-            // Bottom rim
-            translate([0, 0, -end_thickness])
-            hull() {
-                translate([last_x + wall_clearance_x, 0, 0])
-                outer_cylinder(dimensions, end_thickness);
-                translate([-wall_clearance_x, 0, 0])
-                outer_cylinder(dimensions, end_thickness);
-            }
+            end_cap(dimensions, cell_count);
         }
     
         for (i = [0:cell_count - 1]) {
-            translate([spacing * i, 0, 0])
+            translate([spacing(dimensions) * i, 0, 0])
             cylinder(d=dimensions.x, h=dimensions.y);
         }
     }
@@ -59,16 +63,21 @@ module battery_case_inner(dimensions, cell_count) {
 
 module battery_case_outer(dimensions, cell_count) {
     $fn = 60;
-    spacing = dimensions.x * 1.1;
-    last_x = spacing * (cell_count - 1);
+    last_x = last_x(dimensions, cell_count);
     
     difference() {
-        translate([0, 0, 0])
-        hull() {
-            translate([last_x + wall_clearance_x, 0, 0])
-            outer_cylinder(dimensions, dimensions.y + end_thickness);
-            translate([-wall_clearance_x, 0, 0])
-            outer_cylinder(dimensions, dimensions.y + end_thickness);
+        union() {
+            translate([0, 0, 0])
+            hull() {
+                translate([last_x + wall_clearance_x, 0, 0])
+                outer_cylinder(dimensions, dimensions.y + epsilon);
+                translate([-wall_clearance_x, 0, 0])
+                outer_cylinder(dimensions, dimensions.y + epsilon);
+            }
+
+            translate([0, 0, dimensions.y - epsilon])
+            mirror([0, 0, 1])
+            end_cap(dimensions, cell_count);
         }
 
         translate([0, 0, 0])
@@ -82,11 +91,32 @@ module battery_case_outer(dimensions, cell_count) {
     
     module inside_of_outer_cylinder() {
         translate([0, 0, -epsilon])
-        cylinder(d=dimensions.x + (inner_wall_thickness + wall_clearance_round) * 2, h=dimensions.y + end_thickness + epsilon);
+        cylinder(d=dimensions.x + (inner_wall_thickness + wall_clearance_round) * 2, h=dimensions.y);
     }
 }
 
+module end_cap(dimensions, cell_count) {
+    translate([0, 0, -end_thickness])
+    hull() {
+        translate([last_x(dimensions, cell_count) + wall_clearance_x, 0, 0])
+        end_cap_cylinder();
+        translate([-wall_clearance_x, 0, 0])
+        end_cap_cylinder();
+    }
+    
+    module end_cap_cylinder() {
+        hull() {
+            cylinder(
+                d=outer_diameter(dimensions) - end_thickness * 1.1,
+                h=end_thickness / 2);
+            translate([0, 0, end_thickness / 2 - epsilon])
+            cylinder(
+                d=outer_diameter(dimensions),
+                h=end_thickness / 2);
+        }
+    }
+}
 
 module outer_cylinder(dimensions, h) {
-    cylinder(d=dimensions.x + (inner_wall_thickness + outer_wall_thickness + wall_clearance_round) * 2, h=h);
+    cylinder(d=outer_diameter(dimensions), h=h);
 }
