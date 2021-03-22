@@ -110,10 +110,10 @@ module finger_grip(dimensions, cell_count, negative=false) {
         rotate([90, 0, 0])
         cylinder(h=outer_diameter(dimensions) + (negative ? epsilon * 2 : 0), d=d, center=true, $fn=120);
         
-        // Cut to half cylinder
-        translate([0, 0, -epsilon])
-        linear_extrude(d/2 + epsilon)
-        square([d, d], center=true);
+        // Cut to half cylinder and exclude from interior
+        mirrored([0, 1, 0])
+        translate([-d/2, dimensions.x / 2, -epsilon])
+        cube([d, (outer_diameter(dimensions) - dimensions.x) / 2, d + epsilon * 2]);
     }
 }
 
@@ -142,4 +142,9 @@ module end_cap(dimensions, cell_count) {
 
 module outer_cylinder(dimensions, h) {
     cylinder(d=outer_diameter(dimensions), h=h);
+}
+
+module mirrored(axis) {
+    children();
+    mirror(axis) children();
 }
