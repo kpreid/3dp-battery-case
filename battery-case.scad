@@ -6,7 +6,7 @@ inner_wall_thickness = 0.8;
 outer_wall_thickness = 0.8;
 inter_cell_wall = 0.8;
 wall_clearance_x = 0.2;
-wall_clearance_round = 0.2;
+wall_clearance_round = 0.25;
 end_thickness = 0.8;
 end_bevel = 0.6;
 
