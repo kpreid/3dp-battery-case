@@ -1,6 +1,6 @@
 // [Diameter, length], including clearance
 aa_dimensions = [14.7, 51];
-aaa_dimensions = [44.5, 10.85];
+aaa_dimensions = [10.6, 44.5];
 
 inner_wall_thickness = 0.8;
 outer_wall_thickness = 0.8;
@@ -103,7 +103,7 @@ module battery_case_outer(dimensions, cell_count) {
 }
 
 module finger_grip(dimensions, cell_count, negative=false) {
-    d = 20 + (negative ? 0.4 : 0);
+    d = min(20, dimensions.x) + (negative ? 0.4 : 0);
     
     translate([last_x(dimensions, cell_count) / 2, 0, 0])
     scale(negative ? [1, 1, 1] : [1, 1, 0.5])
