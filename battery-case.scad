@@ -1,6 +1,6 @@
 // [Diameter, length], including clearance
 aa_dimensions = [14.7, 51];
-aaa_dimensions = [10.6, 44.5];
+aaa_dimensions = [10.8, 44.5];
 
 inner_wall_thickness = 0.8;
 outer_wall_thickness = 0.8;
